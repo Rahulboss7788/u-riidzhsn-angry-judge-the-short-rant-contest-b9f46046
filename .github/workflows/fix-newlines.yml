@@ -1,0 +1,21 @@
+name: Fix trailing newlines
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Strip trailing newline
+        run: |
+          perl -0777 -i -pe 's/\n\z//' package.json .makefun/owner.json
+          wc -c package.json .makefun/owner.json
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json .makefun/owner.json
+          git diff --cached --quiet || git commit -m "Strip trailing newlines from package.json and owner.json"
+          git push
